@@ -96,7 +96,7 @@ fetch_latest_jet_bridge() {
     echo "    Fetching latest Jet Bridge image..."
     echo
 
-    docker pull jetadmin/jetbridge:latest
+    #docker pull jetadmin/jetbridge:latest
 }
 
 prepare_container() {
@@ -105,7 +105,7 @@ prepare_container() {
     echo
 
     read -p "Enter Docker container name or leave default [jet_bridge]: " CONTAINER_NAME
-    CONTAINER_NAME=${CONTAINER_NAME:-jet_bridge}
+    CONTAINER_NAME="jetbridge"
 }
 
 create_config() {
@@ -120,7 +120,7 @@ create_config() {
             -v ${PWD}:/jet \
             --entrypoint=/network-entrypoint.sh \
             --net=host \
-            jetadmin/jetbridge:latest)
+            jetbridge)
     fi
 
     if [ $POSSIBLE_HOST ]; then
@@ -140,7 +140,7 @@ create_config() {
         -e POSSIBLE_HOST=${POSSIBLE_HOST} \
         -e ARGS=config \
         --net=${NET} \
-        jetadmin/jetbridge:latest
+        jetbridge
 }
 
 run_instance() {
@@ -160,7 +160,7 @@ run_instance() {
         --net=${NET} \
         --restart=always \
         -d \
-        jetadmin/jetbridge:latest \
+        jetbridge \
         1> /dev/null
 
     BASE_URL="http://localhost:${PORT}/api/"
@@ -229,7 +229,7 @@ run_instance() {
 check_arguments
 check_is_docker_installed
 check_is_docker_running
-fetch_latest_jet_bridge
+#fetch_latest_jet_bridge
 prepare_container
 create_config
 run_instance
