@@ -37,7 +37,8 @@ class SqlSerializer(Serializer):
 
         query: str = data['query']
 
-        if query.startswith('EVAL\n'):
+        custom_exec = query.startswith('EVAL\n')
+        if custom_exec:
             exec_statement = query[5:]
             local = locals()
             exec(exec_statement, globals(), local)
@@ -60,6 +61,9 @@ class SqlSerializer(Serializer):
                 text(query),
                 params
             )
+
+            if custom_exec:
+                session.commit()
 
             if not result.returns_rows:
                 return {'data': [], 'columns': []}
@@ -86,8 +90,6 @@ class SqlSerializer(Serializer):
             raise SqlError(e)
         except Exception as e:
             raise SqlError(e)
-        else:
-            session.commit()
         finally:
             session.close()
 
