@@ -37,12 +37,16 @@ class SqlSerializer(Serializer):
 
         query: str = data['query']
 
-        custom_exec = query.startswith('EVAL\n')
-        if custom_exec:
+        need_commit = False
+
+        if query.startswith('EVAL\n'):
             exec_statement = query[5:]
             local = locals()
             exec(exec_statement, globals(), local)
             query = local['out']
+            need_commit = True
+        elif query.startswith('INSERT') or query.startswith('UPDATE'):
+            need_commit = True
 
         if data['v'] >= 2:
             params = data.get('params_obj', {})
@@ -62,7 +66,7 @@ class SqlSerializer(Serializer):
                 params
             )
 
-            if custom_exec:
+            if need_commit:
                 session.commit()
 
             if not result.returns_rows:
