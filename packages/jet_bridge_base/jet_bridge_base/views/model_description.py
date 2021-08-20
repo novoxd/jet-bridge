@@ -2,7 +2,7 @@ from sqlalchemy import inspect
 from sqlalchemy.orm.base import ONETOMANY
 
 from jet_bridge_base.db import get_mapped_base
-from jet_bridge_base.models import data_types
+from jet_bridge_base.models import data_types, materialized_views
 from jet_bridge_base.permissions import HasProjectPermissions
 from jet_bridge_base.responses.json import JSONResponse
 from jet_bridge_base.serializers.model_description import ModelDescriptionSerializer
@@ -130,7 +130,9 @@ class ModelDescriptionView(APIView):
 
             return result
 
-        return list(map(map_table, MappedBase.classes))
+        views = materialized_views.get_materialized_views(request)
+
+        return list(map(map_table, list(MappedBase.classes.values()) + list(views.values())))
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset(request)

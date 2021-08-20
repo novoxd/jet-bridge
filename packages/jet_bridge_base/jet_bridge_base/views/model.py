@@ -2,6 +2,7 @@ from sqlalchemy import inspect
 from sqlalchemy.exc import SQLAlchemyError
 
 from jet_bridge_base.db import get_mapped_base
+from jet_bridge_base.models import materialized_views
 from jet_bridge_base.exceptions.not_found import NotFound
 from jet_bridge_base.filters.model import get_model_filter_class
 from jet_bridge_base.filters.model_aggregate import ModelAggregateFilter
@@ -51,10 +52,13 @@ class ModelViewSet(ModelAPIViewMixin):
     def get_model(self, request):
         MappedBase = get_mapped_base(request)
 
-        if request.path_kwargs['model'] not in MappedBase.classes:
+        views = materialized_views.get_materialized_views(request)
+        mv = {**MappedBase.classes, **views}
+
+        if request.path_kwargs['model'] not in mv:
             raise NotFound
 
-        return MappedBase.classes[request.path_kwargs['model']]
+        return mv[request.path_kwargs['model']]
 
     def get_serializer_class(self, request):
         Model = self.get_model(request)
